@@ -10,6 +10,8 @@
 
 //! This module implements various search algorithms.
 
+use num_traits::real::Real;
+
 ///
 /// This function implements a binary search algorithm in order to locate
 /// a value in a vector. If the exact value does not exist it will return
@@ -25,13 +27,13 @@
 /// - Returns:
 ///   - The index with the location of the result.
 ///
-pub fn binary_search_vector(vec: &[f64], value: f64, imin: i32, imax: i32) -> i32 {
+pub fn binary_search_vector<T: PartialOrd>(vc: &[T], value: &T, imin: usize, imax: usize) -> usize {
     let mut high = imax;
     let mut low = imin;
     let mut med = imin + (imax - imin) / 2;
 
     while high != (low + 1) {
-        let vmed = vec[med as usize];
+        let vmed = &vc[med];
 
         if vmed <= value {
             low = med;
@@ -47,8 +49,9 @@ pub fn binary_search_vector(vec: &[f64], value: f64, imin: i32, imax: i32) -> i3
 
 ///
 /// This function implements a binary search algorithm in order to locate
-/// a value in a 2.0 dimensional array. If the exact value does not exist
+/// a value in a 2-dimensional array. If the exact value does not exist
 /// it will return the closest smaller value available in the table.
+/// Note that the supplied matrix must be sorted in ascending order.
 ///
 /// - Arguments:
 ///   - `mat`: The matrix (2D) to use for searching.
@@ -61,27 +64,27 @@ pub fn binary_search_vector(vec: &[f64], value: f64, imin: i32, imax: i32) -> i3
 /// - Returns:
 ///   - A tuple (i, j) with the indices for the location of the value.
 ///
-pub fn binary_search_array(
-    mat: &[Vec<f64>],
-    value: f64,
-    imin: i32,
-    imax: i32,
-    jmin: i32,
-    jmax: i32,
-) -> (i32, i32) {
-    let mut j_index = binary_search_vector(&mat[imin as usize], value, jmin, jmax);
-    let mut value_found = mat[imin as usize][j_index as usize];
-    let mut error_previous = (value - value_found) / value_found.abs();
+pub fn binary_search_array<T: PartialOrd + Real>(
+    mat: &[Vec<T>],
+    value: &T,
+    imin: usize,
+    imax: usize,
+    jmin: usize,
+    jmax: usize,
+) -> (usize, usize) {
+    let mut j_index = binary_search_vector(&mat[imin], value, jmin, jmax);
+    let mut value_found = &mat[imin][j_index];
+    let mut error_previous = *value - *value_found;
 
     let mut i = imin;
     let mut j = j_index;
 
     for i_index in (imin + 1)..=imax {
-        j_index = binary_search_vector(&mat[i_index as usize], value, jmin, jmax);
-        value_found = mat[i as usize][j as usize];
-        let error_new = (value - value_found) / value_found.abs();
+        j_index = binary_search_vector(&mat[i_index], value, jmin, jmax);
+        value_found = &mat[i_index][j_index];
+        let error_new = *value - *value_found;
 
-        if error_new >= 0.0 && error_new < error_previous {
+        if error_new >= T::zero() && error_new < error_previous {
             i = i_index;
             j = j_index;
         }
