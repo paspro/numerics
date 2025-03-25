@@ -14,12 +14,12 @@
 //!  Copyright (c) 2025 by Dr. Panos Asproulis (p.asproulis@icloud.com).
 //!  All Rights Reserved.
 
-pub mod root_finder;
 pub mod interpolations;
+pub mod root_finder;
 pub mod search;
 pub mod sorting;
 
-pub use root_finder::*;
 pub use interpolations::*;
+pub use root_finder::*;
 pub use search::*;
 pub use sorting::*;

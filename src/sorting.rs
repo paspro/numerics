@@ -11,7 +11,7 @@
 //! Implementation of various sorting algorithms.
 
 ///
-/// Sorts a vector in ascending order using the quicksort algorithm and 
+/// Sorts a vector in ascending order using the quicksort algorithm and
 /// optionally tracks the original indices of elements.
 ///
 /// This function implements an in-place quicksort that can also maintain
@@ -56,23 +56,28 @@ pub fn quicksort_with_indices<T: PartialOrd>(vec: &mut [T], return_indices: bool
             _quicksort(vec, 0, n - 1);
         }
     }
-    
+
     indices
 }
 
 ///
 /// Internal implementation of quicksort with index tracking.
-/// 
+///
 /// - Arguments:
 ///   - `vec`: The vector to sort.
 ///   - `indices`: The vector to store the original indices.
 ///   - `left`: The leftmost index of the vector.
 ///   - `right`: The rightmost index of the vector.
-/// 
-fn _quicksort_with_indices<T: PartialOrd>(vec: &mut [T], indices: &mut [usize], left: usize, right: usize) {
+///
+fn _quicksort_with_indices<T: PartialOrd>(
+    vec: &mut [T],
+    indices: &mut [usize],
+    left: usize,
+    right: usize,
+) {
     if left < right {
         let pivot = partition_with_indices(vec, indices, left, right);
-        
+
         if pivot > 0 {
             _quicksort_with_indices(vec, indices, left, pivot - 1);
         }
@@ -82,16 +87,16 @@ fn _quicksort_with_indices<T: PartialOrd>(vec: &mut [T], indices: &mut [usize], 
 
 ///
 /// Internal implementation of quicksort without index tracking (for performance).
-/// 
+///
 /// - Arguments:
 ///   - `vec`: The vector to sort.
 ///   - `left`: The leftmost index of the vector.
 ///   - `right`: The rightmost index of the vector.
-/// 
+///
 fn _quicksort<T: PartialOrd>(vec: &mut [T], left: usize, right: usize) {
     if left < right {
         let pivot = partition(vec, left, right);
-        
+
         if pivot > 0 {
             _quicksort(vec, left, pivot - 1);
         }
@@ -101,23 +106,28 @@ fn _quicksort<T: PartialOrd>(vec: &mut [T], left: usize, right: usize) {
 
 ///
 /// Partition function with index tracking.
-/// 
+///
 /// - Arguments:
 ///   - `vec`: The vector to partition.
 ///   - `indices`: The vector to store the original indices.
 ///   - `left`: The leftmost index of the vector.
 ///   - `right`: The rightmost index of the vector.
-/// 
+///
 /// - Returns:
 ///   - The pivot index.
-/// 
-fn partition_with_indices<T: PartialOrd>(vec: &mut [T], indices: &mut [usize], left: usize, right: usize) -> usize {
+///
+fn partition_with_indices<T: PartialOrd>(
+    vec: &mut [T],
+    indices: &mut [usize],
+    left: usize,
+    right: usize,
+) -> usize {
     //
     // Use rightmost element as pivot.
     //
     let pivot = right;
     let mut i = left;
-    
+
     for j in left..right {
         if vec[j] <= vec[pivot] {
             //
@@ -136,35 +146,35 @@ fn partition_with_indices<T: PartialOrd>(vec: &mut [T], indices: &mut [usize], l
     //
     vec.swap(i, pivot);
     indices.swap(i, pivot);
-    
+
     i
 }
 
 ///
 /// Partition function without index tracking.
-/// 
+///
 /// - Arguments:
 ///   - `vec`: The vector to partition.
 ///   - `left`: The leftmost index of the vector.
 ///   - `right`: The rightmost index of the vector.
-/// 
+///
 /// - Returns:
 ///   - The pivot index.
-/// 
+///
 fn partition<T: PartialOrd>(vec: &mut [T], left: usize, right: usize) -> usize {
     //
     // Use rightmost element as pivot.
     //
     let pivot = right;
     let mut i = left;
-    
+
     for j in left..right {
         if vec[j] <= vec[pivot] {
             vec.swap(i, j);
             i += 1;
         }
     }
-    
+
     vec.swap(i, pivot);
     i
 }
@@ -180,7 +190,7 @@ mod tests {
         //
         let mut vec = vec![5, 2, 9, 1, 5, 6];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec![1, 2, 5, 5, 6, 9]);
         assert_eq!(indices, vec![3, 1, 0, 4, 5, 2]);
         //
@@ -188,11 +198,11 @@ mod tests {
         //
         let mut vec = vec![5, 2, 9, 1, 5, 6];
         let indices = quicksort_with_indices(&mut vec, false);
-        
+
         assert_eq!(vec, vec![1, 2, 5, 5, 6, 9]);
         assert_eq!(indices, Vec::<usize>::new());
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_empty() {
         //
@@ -200,11 +210,11 @@ mod tests {
         //
         let mut vec: Vec<i32> = vec![];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec![]);
         assert_eq!(indices, vec![]);
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_single_element() {
         //
@@ -212,11 +222,11 @@ mod tests {
         //
         let mut vec = vec![42];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec![42]);
         assert_eq!(indices, vec![0]);
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_already_sorted() {
         //
@@ -224,11 +234,11 @@ mod tests {
         //
         let mut vec = vec![1, 2, 3, 4, 5];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec![1, 2, 3, 4, 5]);
         assert_eq!(indices, vec![0, 1, 2, 3, 4]);
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_reverse_sorted() {
         //
@@ -236,11 +246,11 @@ mod tests {
         //
         let mut vec = vec![5, 4, 3, 2, 1];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec![1, 2, 3, 4, 5]);
         assert_eq!(indices, vec![4, 3, 2, 1, 0]);
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_duplicate_elements() {
         //
@@ -248,29 +258,32 @@ mod tests {
         //
         let mut vec = vec![3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec![1, 1, 2, 3, 3, 4, 5, 5, 5, 6, 9]);
         //
         // Check that indices correctly map to original positions.
         //
         for (i, &idx) in indices.iter().enumerate() {
-            assert_eq!(vec[i], match idx {
-                0 => 3,
-                1 => 1,
-                2 => 4,
-                3 => 1,
-                4 => 5,
-                5 => 9,
-                6 => 2,
-                7 => 6,
-                8 => 5,
-                9 => 3,
-                10 => 5,
-                _ => panic!("Invalid index"),
-            });
+            assert_eq!(
+                vec[i],
+                match idx {
+                    0 => 3,
+                    1 => 1,
+                    2 => 4,
+                    3 => 1,
+                    4 => 5,
+                    5 => 9,
+                    6 => 2,
+                    7 => 6,
+                    8 => 5,
+                    9 => 3,
+                    10 => 5,
+                    _ => panic!("Invalid index"),
+                }
+            );
         }
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_different_types() {
         //
@@ -278,7 +291,7 @@ mod tests {
         //
         let mut vec = vec![3.14, 1.59, 2.65, 3.58, 9.79];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert!(vec[0] <= vec[1] && vec[1] <= vec[2] && vec[2] <= vec[3] && vec[3] <= vec[4]);
         assert_eq!(indices.len(), 5);
         //
@@ -286,11 +299,11 @@ mod tests {
         //
         let mut vec = vec!["banana", "apple", "cherry", "date", "elderberry"];
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, vec!["apple", "banana", "cherry", "date", "elderberry"]);
         assert_eq!(indices, vec![1, 0, 2, 3, 4]);
     }
-    
+
     #[test]
     fn test_quicksort_with_indices_large() {
         //
@@ -299,14 +312,14 @@ mod tests {
         let original: Vec<i32> = (0..100).rev().collect();
         let expected: Vec<i32> = (0..100).collect();
         let expected_indices: Vec<usize> = (0..100).rev().collect();
-        
+
         let mut vec = original.clone();
         let indices = quicksort_with_indices(&mut vec, true);
-        
+
         assert_eq!(vec, expected);
         assert_eq!(indices, expected_indices);
     }
-    
+
     #[test]
     fn test_partition() {
         //
@@ -323,11 +336,11 @@ mod tests {
         //
         // All elements after pivot should be > pivot value.
         //
-        for i in (pivot_idx+1)..vec.len() {
+        for i in (pivot_idx + 1)..vec.len() {
             assert!(vec[i] > vec[pivot_idx]);
         }
     }
-    
+
     #[test]
     fn test_partition_with_indices() {
         //
@@ -335,7 +348,7 @@ mod tests {
         //
         let mut vec = vec![5, 2, 9, 1, 5, 6];
         let mut indices = vec![0, 1, 2, 3, 4, 5];
-        
+
         let pivot_idx = partition_with_indices(&mut vec, &mut indices, 0, 5);
         //
         // All elements before pivot should be <= pivot value.
@@ -346,25 +359,28 @@ mod tests {
         //
         // All elements after pivot should be > pivot value.
         //
-        for i in (pivot_idx+1)..vec.len() {
+        for i in (pivot_idx + 1)..vec.len() {
             assert!(vec[i] > vec[pivot_idx]);
         }
         //
         // Check that indices were swapped along with elements.
         //
         for (i, &idx) in indices.iter().enumerate() {
-            assert_eq!(vec[i], match idx {
-                0 => 5,
-                1 => 2,
-                2 => 9,
-                3 => 1,
-                4 => 5,
-                5 => 6,
-                _ => panic!("Invalid index"),
-            });
+            assert_eq!(
+                vec[i],
+                match idx {
+                    0 => 5,
+                    1 => 2,
+                    2 => 9,
+                    3 => 1,
+                    4 => 5,
+                    5 => 6,
+                    _ => panic!("Invalid index"),
+                }
+            );
         }
     }
-    
+
     #[test]
     fn test_internal_quicksort() {
         //
@@ -373,10 +389,10 @@ mod tests {
         let mut vec = vec![5, 2, 9, 1, 5, 6];
         let len = vec.len() - 1;
         _quicksort(&mut vec, 0, len);
-        
+
         assert_eq!(vec, vec![1, 2, 5, 5, 6, 9]);
     }
-    
+
     #[test]
     fn test_internal_quicksort_with_indices() {
         //
@@ -387,7 +403,7 @@ mod tests {
         let len = vec.len() - 1;
 
         _quicksort_with_indices(&mut vec, &mut indices, 0, len);
-        
+
         assert_eq!(vec, vec![1, 2, 5, 5, 6, 9]);
         //
         // Verify indices match the original positions.
@@ -395,7 +411,7 @@ mod tests {
         let expected_indices = vec![3, 1, 0, 4, 5, 2];
         assert_eq!(indices, expected_indices);
     }
-    
+
     #[test]
     fn test_quicksort_stability() {
         //
@@ -406,27 +422,21 @@ mod tests {
         //
         #[derive(Debug, Clone, PartialEq)]
         struct Pair(i32, i32);
-        
+
         impl PartialOrd for Pair {
             fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
                 self.0.partial_cmp(&other.0)
             }
         }
-        
-        let mut vec = vec![
-            Pair(5, 1),
-            Pair(2, 2),
-            Pair(5, 3),
-            Pair(1, 4),
-            Pair(5, 5),
-        ];
-        
+
+        let mut vec = vec![Pair(5, 1), Pair(2, 2), Pair(5, 3), Pair(1, 4), Pair(5, 5)];
+
         let indices = quicksort_with_indices(&mut vec, true);
         //
         // Check sorting is correct.
         //
-        for i in 0..vec.len()-1 {
-            assert!(vec[i].0 <= vec[i+1].0);
+        for i in 0..vec.len() - 1 {
+            assert!(vec[i].0 <= vec[i + 1].0);
         }
         //
         // Count how many "5"s we have and verify they're together.
@@ -441,7 +451,7 @@ mod tests {
                 0 => Pair(5, 1),
                 1 => Pair(2, 2),
                 2 => Pair(5, 3),
-                3 => Pair(1, 4), 
+                3 => Pair(1, 4),
                 4 => Pair(5, 5),
                 _ => panic!("Invalid index"),
             };
