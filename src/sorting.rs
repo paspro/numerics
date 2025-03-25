@@ -20,7 +20,7 @@
 ///             of the original vector. It can be used in order to
 ///             apply similar modifications to other associated vectors.
 ///
-pub fn quicksort(vec: &mut [f64], indx: &mut Option<&mut [i32]>) {
+pub fn quicksort<T: PartialOrd>(vec: &mut [T], indx: &mut Option<&mut [usize]>) {
     if vec.len() > 1 {
         let iq = partition(vec, indx);
         //
@@ -47,24 +47,23 @@ pub fn quicksort(vec: &mut [f64], indx: &mut Option<&mut [i32]>) {
 /// - Returns:
 ///   - The partition marker.
 ///
-fn partition(vec: &mut [f64], indx: &mut Option<&mut [i32]>) -> usize {
-    let x = vec[0];
+fn partition<T: PartialOrd>(vc: &mut [T], indx: &mut Option<&mut [usize]>) -> usize {
     let mut i = 0;
-    let mut j = vec.len();
+    let mut j = vc.len();
 
     loop {
         j -= 1;
-        while vec[j] > x {
+        while vc[j] > vc[0] {
             j -= 1;
         }
 
         i += 1;
-        while i < j && vec[i] < x {
+        while i < j && vc[i] < vc[0] {
             i += 1;
         }
 
         if i < j {
-            vec.swap(i, j);
+            vc.swap(i, j);
             if let Some(idx) = indx {
                 idx.swap(i, j);
             }
