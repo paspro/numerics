@@ -35,8 +35,8 @@ pub fn interpolate_cubic<T: Float>(x: &[T; 2], u: &[T; 2], u_prime: &[T; 2], xi:
     //
     // Calculate key differences.
     //
-    let dx = x[1] - x[0];  // x₁ - x₀
-    let t = (xi - x[0]) / dx;  // Normalized coordinate (0 to 1)
+    let dx = x[1] - x[0]; // x₁ - x₀
+    let t = (xi - x[0]) / dx; // Normalized coordinate (0 to 1)
     //
     // Constants for calculation.
     //
@@ -46,10 +46,10 @@ pub fn interpolate_cubic<T: Float>(x: &[T; 2], u: &[T; 2], u_prime: &[T; 2], xi:
     //
     // Hermite basis functions for cubic interpolation.
     //
-    let h00 = two * t.powi(3) - three * t.powi(2) + one;  // 2t³ - 3t² + 1
-    let h10 = t.powi(3) - two * t.powi(2) + t;            // t³ - 2t² + t
-    let h01 = -two * t.powi(3) + three * t.powi(2);       // -2t³ + 3t²
-    let h11 = t.powi(3) - t.powi(2);                      // t³ - t²
+    let h00 = two * t.powi(3) - three * t.powi(2) + one; // 2t³ - 3t² + 1
+    let h10 = t.powi(3) - two * t.powi(2) + t; // t³ - 2t² + t
+    let h01 = -two * t.powi(3) + three * t.powi(2); // -2t³ + 3t²
+    let h11 = t.powi(3) - t.powi(2); // t³ - t²
     //
     // Compute interpolated value using Hermite basis functions.
     //
@@ -175,19 +175,19 @@ mod tests {
         //
         let x = [0.0, 1.0];
         let u = [1.0, 3.0];
-        let u_prime = [2.0, 2.0];  // Constant gradient
+        let u_prime = [2.0, 2.0]; // Constant gradient
         let xi = 0.5;
-        
+
         let result = interpolate_cubic(&x, &u, &u_prime, xi);
         assert_approx_eq!(result, 2.0, 1e-6);
         //
         // Test case 2: Interpolate a quadratic function.
         //
         let x = [1.0, 3.0];
-        let u = [1.0, 9.0];        // f(x) = x²
-        let u_prime = [2.0, 6.0];  // f'(x) = 2x
+        let u = [1.0, 9.0]; // f(x) = x²
+        let u_prime = [2.0, 6.0]; // f'(x) = 2x
         let xi = 2.0;
-        
+
         let result = interpolate_cubic(&x, &u, &u_prime, xi);
         assert_approx_eq!(result, 4.0, 1e-6);
         //
@@ -197,7 +197,7 @@ mod tests {
         let u = [2.0, 8.0];
         let u_prime = [1.5, 3.0];
         let xi = 2.5;
-        
+
         let result = interpolate_cubic(&x, &u, &u_prime, xi);
         println!("result: {}", result);
         assert_approx_eq!(result, 4.4375, 1e-6);
@@ -210,28 +210,28 @@ mod tests {
         // f(x) = x³ at points x = -1, 0, 1, 2.
         //
         let x = [-1.0, 0.0, 1.0, 2.0];
-        let u = [-1.0, 0.0, 1.0, 8.0];  // f(x) = x³
+        let u = [-1.0, 0.0, 1.0, 8.0]; // f(x) = x³
         let xi = 0.5;
-        
+
         let result = interpolate_cubic_numerical(&x, &u, xi);
-        assert_approx_eq!(result, 0.125, 1e-6);  // 0.5³ = 0.125
+        assert_approx_eq!(result, 0.125, 1e-6); // 0.5³ = 0.125
         //
         // Test case 2: Interpolate a quadratic function.
         // f(x) = x² at points x = -2, -1, 1, 2.
         //
         let x = [-2.0, -1.0, 1.0, 2.0];
-        let u = [4.0, 1.0, 1.0, 4.0];  // f(x) = x²
+        let u = [4.0, 1.0, 1.0, 4.0]; // f(x) = x²
         let xi = 0.0;
-        
+
         let result = interpolate_cubic_numerical(&x, &u, xi);
-        assert_approx_eq!(result, 0.0, 1e-6);  // 0² = 0
+        assert_approx_eq!(result, 0.0, 1e-6); // 0² = 0
         //
         // Test case 3: Interpolation at one of the data points.
         //
         let x = [1.0, 2.0, 3.0, 4.0];
         let u = [10.0, 20.0, 30.0, 40.0];
-        let xi = 3.0;  // Exact data point
-        
+        let xi = 3.0; // Exact data point
+
         let result = interpolate_cubic_numerical(&x, &u, xi);
         assert_approx_eq!(result, 30.0, 1e-6);
     }
@@ -244,31 +244,28 @@ mod tests {
         let x = [0.0, 1.0];
         let y = [0.0, 1.0];
         let u = [
-            [1.0, 2.0],  // u(0,0) = 1, u(0,1) = 2
-            [3.0, 4.0],  // u(1,0) = 3, u(1,1) = 4
+            [1.0, 2.0], // u(0,0) = 1, u(0,1) = 2
+            [3.0, 4.0], // u(1,0) = 3, u(1,1) = 4
         ];
         //
         // Interpolate at center point (0.5, 0.5).
         //
         let result = interpolate_bilinear(&x, &y, &u, 0.5, 0.5);
-        assert_approx_eq!(result, 2.5, 1e-6);  // Should be average of all four corners
+        assert_approx_eq!(result, 2.5, 1e-6); // Should be average of all four corners
         //
         // Test case 2: Interpolate along edges.
         //
         let result_edge_x = interpolate_bilinear(&x, &y, &u, 0.5, 0.0);
-        assert_approx_eq!(result_edge_x, 2.0, 1e-6);  // Halfway between 1 and 3
-        
+        assert_approx_eq!(result_edge_x, 2.0, 1e-6); // Halfway between 1 and 3
+
         let result_edge_y = interpolate_bilinear(&x, &y, &u, 0.0, 0.5);
-        assert_approx_eq!(result_edge_y, 1.5, 1e-6);  // Halfway between 1 and 2
+        assert_approx_eq!(result_edge_y, 1.5, 1e-6); // Halfway between 1 and 2
         //
         // Test case 3: Non-uniform grid.
         //
         let x = [1.0, 3.0];
         let y = [2.0, 5.0];
-        let u = [
-            [10.0, 20.0],
-            [30.0, 40.0],
-        ];
+        let u = [[10.0, 20.0], [30.0, 40.0]];
         //
         // Interpolate at point (2.0, 3.5).
         //
@@ -284,38 +281,38 @@ mod tests {
         let x = [-1.0, 0.0, 1.0, 2.0];
         let y = [-1.0, 0.0, 1.0, 2.0];
         let u = [
-            [-2.0, -1.0, 0.0, 1.0],  // f(-1,y) = -1 + y
-            [-1.0, 0.0, 1.0, 2.0],   // f(0,y) = 0 + y
-            [0.0, 1.0, 2.0, 3.0],    // f(1,y) = 1 + y
-            [1.0, 2.0, 3.0, 4.0],    // f(2,y) = 2 + y
+            [-2.0, -1.0, 0.0, 1.0], // f(-1,y) = -1 + y
+            [-1.0, 0.0, 1.0, 2.0],  // f(0,y) = 0 + y
+            [0.0, 1.0, 2.0, 3.0],   // f(1,y) = 1 + y
+            [1.0, 2.0, 3.0, 4.0],   // f(2,y) = 2 + y
         ];
         //
         // Interpolate at point (0.5, 0.5).
         //
         let result = interpolate_bicubic(&x, &y, &u, 0.5, 0.5);
-        assert_approx_eq!(result, 1.0, 1e-6);  // 0.5 + 0.5 = 1.0
+        assert_approx_eq!(result, 1.0, 1e-6); // 0.5 + 0.5 = 1.0
         //
         // Test case 2: Interpolate at exact data point.
         //
         let result_exact = interpolate_bicubic(&x, &y, &u, 1.0, 1.0);
-        assert_approx_eq!(result_exact, 2.0, 1e-6);  // 1 + 1 = 2
+        assert_approx_eq!(result_exact, 2.0, 1e-6); // 1 + 1 = 2
         //
         // Test case 3: Interpolate a more complex function (quadratic).
         // f(x,y) = x² + y²
         //
         let u_quadratic = [
-            [2.0, 1.0, 2.0, 5.0],    // f(-1,y) = 1 + y²
-            [1.0, 0.0, 1.0, 4.0],    // f(0,y) = 0 + y²
-            [2.0, 1.0, 2.0, 5.0],    // f(1,y) = 1 + y²
-            [5.0, 4.0, 5.0, 8.0],    // f(2,y) = 4 + y²
+            [2.0, 1.0, 2.0, 5.0], // f(-1,y) = 1 + y²
+            [1.0, 0.0, 1.0, 4.0], // f(0,y) = 0 + y²
+            [2.0, 1.0, 2.0, 5.0], // f(1,y) = 1 + y²
+            [5.0, 4.0, 5.0, 8.0], // f(2,y) = 4 + y²
         ];
         //
         // Interpolate at point (0.5, 0.5).
         //
         let result_quad = interpolate_bicubic(&x, &y, &u_quadratic, 0.5, 0.5);
-        assert_approx_eq!(result_quad, 0.5, 1e-2);  // 0.5² + 0.5² = 0.5 (with some tolerance)
+        assert_approx_eq!(result_quad, 0.5, 1e-2); // 0.5² + 0.5² = 0.5 (with some tolerance)
     }
-    
+
     #[test]
     fn test_float_types() {
         //
@@ -325,7 +322,7 @@ mod tests {
         let u_f32 = [1.0f32, 3.0f32];
         let u_prime_f32 = [2.0f32, 2.0f32];
         let xi_f32 = 0.5f32;
-        
+
         let result_f32 = interpolate_cubic(&x_f32, &u_f32, &u_prime_f32, xi_f32);
         assert_approx_eq!(result_f32, 2.0f32, 1e-6);
         //
@@ -335,7 +332,7 @@ mod tests {
         let u_f64 = [1.0f64, 3.0f64];
         let u_prime_f64 = [2.0f64, 2.0f64];
         let xi_f64 = 0.5f64;
-        
+
         let result_f64 = interpolate_cubic(&x_f64, &u_f64, &u_prime_f64, xi_f64);
         assert_approx_eq!(result_f64, 2.0f64, 1e-10);
     }

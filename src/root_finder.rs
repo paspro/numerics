@@ -10,6 +10,8 @@
 
 //!  This module implements various root finding algorithms.
 
+use num_traits::Float;
+
 ///
 /// This function reverses a generic equation f(x) by computing the value
 /// of "x0" when the value of the equation f(x0) is known with the use of
@@ -24,53 +26,46 @@
 ///   - `tolerance`: The tolerance to utilise for the numerical method.
 ///   - `max_iterations`: The maximum number of allowed iterations.
 ///   - `n_order`: The interpolation order used by the method.
-///   - `logging`: If true then write to the screen logging data.
 ///
 /// - Returns:
 ///   - The value of "x0" when f(x0) is known.
 ///
 #[allow(clippy::too_many_arguments)]
-pub fn function_inverter(
-    f: &dyn Fn(f64) -> f64,
-    f0: f64,
-    guess1: f64,
-    guess2: f64,
-    tolerance: f64,
+pub fn function_inverter<T: Float>(
+    f: &dyn Fn(T) -> T,
+    f0: T,
+    guess1: T,
+    guess2: T,
+    tolerance: T,
     max_iterations: i32,
     n_order: i32,
-    logging: bool,
-) -> f64 {
+) -> T {
     if n_order < 0 {
         eprintln!("\nError in Function: function_inverter");
         eprintln!("The order of interpolation must be a positive integer.");
         eprintln!();
-    }
-    if logging {
-        println!();
-        println!("=========================================");
-        println!("Function f(x) Inverter Algorithm for x");
-        println!("=========================================");
+        return T::nan();
     }
     ///
     /// The solution context for the function inverter.
     ///
-    struct SolutionContext<'a> {
+    struct SolutionContext<'a, T: Float> {
         ///
         /// The function to invert.
         ///
-        f: &'a dyn Fn(f64) -> f64,
+        f: &'a dyn Fn(T) -> T,
         ///
         /// The value of f0 = f(x0).
         ///
-        f0: f64,
+        f0: T,
         ///
         /// A guess for the value of x0.
         ///
-        guess1: f64,
+        guess1: T,
         ///
         /// A second guess for the value of x0.
         ///
-        guess2: f64,
+        guess2: T,
         ///
         /// The interpolation order used by the method.
         ///
@@ -79,7 +74,7 @@ pub fn function_inverter(
     //
     // Implement the solution context.
     //
-    impl<'a> SolutionContext<'a> {
+    impl<'a, T: Float> SolutionContext<'a, T> {
         ///
         /// Create a new solution context.
         ///
@@ -93,13 +88,7 @@ pub fn function_inverter(
         /// - Returns:
         ///   - The solution context.
         ///
-        fn new(
-            f: &'a dyn Fn(f64) -> f64,
-            f0: f64,
-            guess1: f64,
-            guess2: f64,
-            n_order: i32,
-        ) -> Self {
+        fn new(f: &'a dyn Fn(T) -> T, f0: T, guess1: T, guess2: T, n_order: i32) -> Self {
             Self {
                 f,
                 f0,
@@ -136,7 +125,7 @@ pub fn function_inverter(
         /// - Returns:
         ///   - The solution for the function inverter.
         ///
-        fn solution(&mut self, p: i32, i: i32) -> f64 {
+        fn solution(&mut self, p: i32, i: i32) -> T {
             if p == -1 {
                 self.guess1
             } else if p == 0 {
@@ -160,7 +149,6 @@ pub fn function_inverter(
                 let x4 = self.solution(p - i - 2, self.imax(p - i - 2));
                 x3 + (x2 - x3) * (x1 - x3) / (x1 + x2 - x3 - x4)
             }
-
         }
     }
 
@@ -174,21 +162,12 @@ pub fn function_inverter(
         let s = context.solution(iter, n_order);
         let error = (s_old - s).abs() / s.abs();
         s_old = s;
-
-        if logging {
-            println!(" Iteration = {:<5} X = {:.5} Error = {:.5}", iter, s, error);
-        }
         //
         // Check for convergence.
         //
         if error <= tolerance {
             break;
         }
-    }
-
-    if logging {
-        println!("=========================================");
-        println!();
     }
 
     s_old
@@ -209,58 +188,50 @@ pub fn function_inverter(
 ///   - `tolerance` - The tolerance to utilise for the numerical method.
 ///   - `max_iterations` - The maximum number of allowed iterations.
 ///   - `n_order` - The interpolation order used by the method.
-///   - `logging` - If true then write to the screen logging data.
 ///
 /// - Returns:
 ///   - The value of "x0" when f(x0,y0) is known.
 ///
 #[allow(clippy::too_many_arguments)]
-pub fn function_inverter_x(
-    f: &dyn Fn(f64, f64) -> f64,
-    f0: f64,
-    y0: f64,
-    guess1: f64,
-    guess2: f64,
-    tolerance: f64,
+pub fn function_inverter_x<T: Float>(
+    f: &dyn Fn(T, T) -> T,
+    f0: T,
+    y0: T,
+    guess1: T,
+    guess2: T,
+    tolerance: T,
     max_iterations: i32,
     n_order: i32,
-    logging: bool,
-) -> f64 {
+) -> T {
     if n_order < 0 {
         eprintln!("\nError in Function: function_inverter_x");
         eprintln!("The order of interpolation must be a positive integer.");
         eprintln!();
     }
-    if logging {
-        println!();
-        println!("=========================================");
-        println!("Function f(x,y0) Inverter Algorithm for x");
-        println!("=========================================");
-    }
     ///
     /// The solution context for the function inverter.
     ///
-    struct SolutionContext<'a> {
+    struct SolutionContext<'a, T: Float> {
         ///
         /// The function to invert.
         ///
-        f: &'a dyn Fn(f64, f64) -> f64,
+        f: &'a dyn Fn(T, T) -> T,
         ///
         /// The value of f0 = f(x0,y0).
         ///
-        f0: f64,
+        f0: T,
         ///
         /// The value y0.
         ///
-        y0: f64,
+        y0: T,
         ///
         /// A guess for the value of x0.
         ///     
-        guess1: f64,
+        guess1: T,
         ///
         /// A second guess for the value of x0.
         ///     
-        guess2: f64,
+        guess2: T,
         ///
         /// The interpolation order used by the method.
         ///
@@ -269,7 +240,7 @@ pub fn function_inverter_x(
     //
     // Implement the solution context.
     //
-    impl<'a> SolutionContext<'a> {
+    impl<'a, T: Float> SolutionContext<'a, T> {
         ///
         /// Create a new solution context.
         ///
@@ -284,15 +255,8 @@ pub fn function_inverter_x(
         /// - Returns:
         ///   - The solution context.
         ///
-        fn new(
-            f: &'a dyn Fn(f64, f64) -> f64,
-            f0: f64,
-            y0: f64,
-            guess1: f64,
-            guess2: f64,
-            n_order: i32,
-        ) -> Self {
-             Self {
+        fn new(f: &'a dyn Fn(T, T) -> T, f0: T, y0: T, guess1: T, guess2: T, n_order: i32) -> Self {
+            Self {
                 f,
                 f0,
                 y0,
@@ -329,7 +293,7 @@ pub fn function_inverter_x(
         /// - Returns:
         ///   - The solution for the function inverter.
         ///
-        fn solution(&mut self, p: i32, i: i32) -> f64 {
+        fn solution(&mut self, p: i32, i: i32) -> T {
             if p == -1 {
                 self.guess1
             } else if p == 0 {
@@ -366,21 +330,12 @@ pub fn function_inverter_x(
         let s = context.solution(iter, n_order);
         let error = (s_old - s).abs() / s.abs();
         s_old = s;
-
-        if logging {
-            println!(" Iteration = {:<5} X = {:.5} Error = {:.5}", iter, s, error);
-        }
         //
         // Check for convergence.
         //
         if error <= tolerance {
             break;
         }
-    }
-
-    if logging {
-        println!("=========================================");
-        println!();
     }
 
     s_old
@@ -401,58 +356,50 @@ pub fn function_inverter_x(
 ///   - `tolerance`: The tolerance to utilise for the numerical method.
 ///   - `max_iterations`: The maximum number of allowed iterations.
 ///   - `n_order`: The interpolation order used by the method
-///   - `logging`: If true then write to the screen logging data.
 ///
 /// - Returns:
 ///   - The value of "y0" when f(x0,y0) is known.
 ///
 #[allow(clippy::too_many_arguments)]
-pub fn function_inverter_y(
-    f: &dyn Fn(f64, f64) -> f64,
-    f0: f64,
-    x0: f64,
-    guess1: f64,
-    guess2: f64,
-    tolerance: f64,
+pub fn function_inverter_y<T: Float>(
+    f: &dyn Fn(T, T) -> T,
+    f0: T,
+    x0: T,
+    guess1: T,
+    guess2: T,
+    tolerance: T,
     max_iterations: i32,
     n_order: i32,
-    logging: bool,
-) -> f64 {
+) -> T {
     if n_order < 0 {
         eprintln!("\nError in Function: function_inverter_y");
         eprintln!("The order of interpolation must be a positive integer.");
         eprintln!();
     }
-    if logging {
-        println!();
-        println!("=========================================");
-        println!("Function f(x0,y) Inverter Algorithm for y");
-        println!("=========================================");
-    }
     ///
     /// The solution context for the function inverter.
     ///
-    struct SolutionContext<'a> {
+    struct SolutionContext<'a, T: Float> {
         ///
         /// The function to invert.
         ///
-        f: &'a dyn Fn(f64, f64) -> f64,
+        f: &'a dyn Fn(T, T) -> T,
         ///
         /// The value of f0 = f(x0,y0).
         ///
-        f0: f64,
+        f0: T,
         ///
         /// The value x0.
         ///
-        x0: f64,
+        x0: T,
         ///
         /// A guess for the value of y0.
         ///     
-        guess1: f64,
+        guess1: T,
         ///
         /// A second guess for the value of y0.
         ///
-        guess2: f64,
+        guess2: T,
         ///
         /// The interpolation order used by the method.
         ///
@@ -461,7 +408,7 @@ pub fn function_inverter_y(
     //
     // Implement the solution context.
     //
-    impl<'a> SolutionContext<'a> {
+    impl<'a, T: Float> SolutionContext<'a, T> {
         ///
         /// Create a new solution context.
         ///
@@ -473,15 +420,8 @@ pub fn function_inverter_y(
         ///   - `guess2`: A second guess for the value of y0.
         ///   - `n_order`: The interpolation order used by the method.
         ///
-        fn new(
-            f: &'a dyn Fn(f64, f64) -> f64,
-            f0: f64,
-            x0: f64,
-            guess1: f64,
-            guess2: f64,
-            n_order: i32,
-        ) -> Self {
-             Self {
+        fn new(f: &'a dyn Fn(T, T) -> T, f0: T, x0: T, guess1: T, guess2: T, n_order: i32) -> Self {
+            Self {
                 f,
                 f0,
                 x0,
@@ -518,7 +458,7 @@ pub fn function_inverter_y(
         /// - Returns:
         ///   - The solution for the function inverter.
         ///
-        fn solution(&mut self, p: i32, i: i32) -> f64 {
+        fn solution(&mut self, p: i32, i: i32) -> T {
             if p == -1 {
                 self.guess1
             } else if p == 0 {
@@ -555,21 +495,12 @@ pub fn function_inverter_y(
         let s = context.solution(iter, n_order);
         let error = (s_old - s).abs() / s.abs();
         s_old = s;
-
-        if logging {
-            println!(" Iteration = {:<5} Y = {:.5} Error = {:.5}", iter, s, error);
-        }
         //
         // Check for convergence.
         //
         if error <= tolerance {
             break;
         }
-    }
-
-    if logging {
-        println!("=========================================");
-        println!();
     }
 
     s_old
