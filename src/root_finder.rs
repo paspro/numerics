@@ -106,7 +106,7 @@ pub fn function_inverter<T: Float>(
         /// - Returns:
         ///   - The maximum value for the interpolation.
         ///
-        fn imax(&self, p: i32) -> i32 {
+        fn i_max(&self, p: i32) -> i32 {
             if p == -1 || p == 0 {
                 0
             } else if p <= self.n_order {
@@ -134,8 +134,8 @@ pub fn function_inverter<T: Float>(
                 //
                 // Secant step.
                 //
-                let x1 = self.solution(p - 1, self.imax(p - 1));
-                let x2 = self.solution(p - 2, self.imax(p - 2));
+                let x1 = self.solution(p - 1, self.i_max(p - 1));
+                let x2 = self.solution(p - 2, self.i_max(p - 2));
                 let f1 = (self.f)(x1) - self.f0;
                 let f2 = (self.f)(x2) - self.f0;
                 x1 - f1 * (x1 - x2) / (f1 - f2)
@@ -144,24 +144,23 @@ pub fn function_inverter<T: Float>(
                 // i-th order approximation.
                 //
                 let x1 = self.solution(p - 1, i - 1);
-                let x2 = self.solution(p - 1, self.imax(p - 1));
+                let x2 = self.solution(p - 1, self.i_max(p - 1));
                 let x3 = self.solution(p, i - 1);
-                let x4 = self.solution(p - i - 2, self.imax(p - i - 2));
+                let x4 = self.solution(p - i - 2, self.i_max(p - i - 2));
                 x3 + (x2 - x3) * (x1 - x3) / (x1 + x2 - x3 - x4)
             }
         }
     }
 
     let mut context = SolutionContext::new(f, f0, guess1, guess2, n_order);
-    let mut s_old = guess2;
+    let mut s = guess2;
 
     for iter in (n_order + 1)..=max_iterations {
         //
         // Compute the new value.
         //
-        let s = context.solution(iter, n_order);
-        let error = (s_old - s).abs() / s.abs();
-        s_old = s;
+        s = context.solution(iter, n_order);
+        let error = (f(s) - f0).abs();
         //
         // Check for convergence.
         //
@@ -170,7 +169,7 @@ pub fn function_inverter<T: Float>(
         }
     }
 
-    s_old
+    s
 }
 
 ///
@@ -321,15 +320,14 @@ pub fn function_inverter_x<T: Float>(
     }
 
     let mut context = SolutionContext::new(f, f0, y0, guess1, guess2, n_order);
-    let mut s_old = guess2;
+    let mut s = guess2;
 
     for iter in (n_order + 1)..=max_iterations {
         //
         // Compute the new value.
         //
-        let s = context.solution(iter, n_order);
-        let error = (s_old - s).abs() / s.abs();
-        s_old = s;
+        s = context.solution(iter, n_order);
+        let error = (f(s, y0) - f0).abs();
         //
         // Check for convergence.
         //
@@ -338,7 +336,7 @@ pub fn function_inverter_x<T: Float>(
         }
     }
 
-    s_old
+    s
 }
 
 ///
@@ -486,15 +484,14 @@ pub fn function_inverter_y<T: Float>(
     }
 
     let mut context = SolutionContext::new(f, f0, x0, guess1, guess2, n_order);
-    let mut s_old = guess2;
+    let mut s = guess2;
 
     for iter in (n_order + 1)..=max_iterations {
         //
         // Compute the new value.
         //
-        let s = context.solution(iter, n_order);
-        let error = (s_old - s).abs() / s.abs();
-        s_old = s;
+        s = context.solution(iter, n_order);
+        let error = (f(x0, s) - f0).abs();
         //
         // Check for convergence.
         //
@@ -503,5 +500,256 @@ pub fn function_inverter_y<T: Float>(
         }
     }
 
-    s_old
+    s
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use assert_approx_eq::assert_approx_eq;
+
+    #[test]
+    fn test_function_inverter_linear() {
+        //
+        // Test inverting a linear function f(x) = 2x + 3.
+        //
+        let f = |x: f64| -> f64 { 2.0 * x + 3.0 };
+        let f0 = 7.0; // f(2) = 7
+        let guess1 = 1.0;
+        let guess2 = 3.0;
+        let tolerance = 1e-5;
+        let max_iterations = 100;
+        let n_order = 1;
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+        //
+        // Expected: x = 2 (where f(x) = 7).
+        //
+        assert_approx_eq!(result, 2.0, 1e-9);
+    }
+
+    #[test]
+    fn test_function_inverter_quadratic() {
+        //
+        // Test inverting a quadratic function f(x) = x² - 4.
+        //
+        let f = |x: f64| -> f64 { x.powi(2) - 4.0 };
+        let f0 = 0.0; // f(2) = 0 or f(-2) = 0
+        let guess1 = 1.0;
+        let guess2 = 3.0;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = 2;
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+        //
+        // Expected: x = 2 (because of our guesses being positive).
+        //
+        assert_approx_eq!(result, 2.0, 1e-9);
+        //
+        // Test with negative guesses to find the other root.
+        //
+        let result = function_inverter(&f, f0, -1.0, -3.0, tolerance, max_iterations, n_order);
+        //
+        // Expected: x = -2 (because of our guesses being negative).
+        //
+        assert_approx_eq!(result, -2.0, 1e-9);
+    }
+
+    #[test]
+    fn test_function_inverter_exponential() {
+        //
+        // Test inverting an exponential function f(x) = e^x.
+        //
+        let f = |x: f64| -> f64 { x.exp() };
+        let f0 = 1.0; // f(0) = 1
+        let guess1 = -1.0;
+        let guess2 = 1.0;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = 2;
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+        //
+        // Expected: x = 0.
+        //
+        assert_approx_eq!(result, 0.0, 1e-9);
+    }
+
+    #[test]
+    fn test_function_inverter_x() {
+        //
+        // Test inverting a function f(x,y) = x² + y² for x.
+        //
+        let f = |x: f64, y: f64| -> f64 { x.powi(2) + y.powi(2) };
+        let f0 = 5.0; // f(2,1) = 5
+        let y0 = 1.0;
+        let guess1 = 1.0;
+        let guess2 = 3.0;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = 2;
+
+        let result = function_inverter_x(
+            &f,
+            f0,
+            y0,
+            guess1,
+            guess2,
+            tolerance,
+            max_iterations,
+            n_order,
+        );
+        //
+        // Expected: x = 2.
+        //
+        assert_approx_eq!(result, 2.0, 1e-9);
+        //
+        // Test with negative guesses to find the other root.
+        //
+        let result =
+            function_inverter_x(&f, f0, y0, -1.0, -3.0, tolerance, max_iterations, n_order);
+        //
+        // Expected: x = -2.
+        //
+        assert_approx_eq!(result, -2.0, 1e-9);
+    }
+
+    #[test]
+    fn test_function_inverter_y() {
+        //
+        // Test inverting a function f(x,y) = x² + y² for y.
+        //
+        let f = |x: f64, y: f64| -> f64 { x.powi(2) + y.powi(2) };
+        let f0 = 5.0; // f(2,1) = 5
+        let x0 = 2.0;
+        let guess1 = 0.5;
+        let guess2 = 1.5;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = 2;
+
+        let result = function_inverter_y(
+            &f,
+            f0,
+            x0,
+            guess1,
+            guess2,
+            tolerance,
+            max_iterations,
+            n_order,
+        );
+        //
+        // Expected: y = 1.
+        //
+        assert_approx_eq!(result, 1.0, 1e-9);
+        //
+        // Test with negative guesses to find the other root.
+        //
+        let result =
+            function_inverter_y(&f, f0, x0, -0.5, -1.5, tolerance, max_iterations, n_order);
+        //
+        // Expected: y = -1.
+        //
+        assert_approx_eq!(result, -1.0, 1e-9);
+    }
+
+    #[test]
+    fn test_function_inverter_polynomial() {
+        //
+        // Test inverting a polynomial function f(x) = x³ - 2x² + x - 3.
+        //
+        let f = |x: f64| -> f64 { x.powi(3) - 2.0 * x.powi(2) + x - 3.0 };
+        let f0 = 0.0; // Looking for a root
+        let guess1 = 2.0;
+        let guess2 = 4.0;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = 3;
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+        //
+        // Verify that the result is actually a root.
+        //
+        let function_value = f(result);
+        assert_approx_eq!(function_value, 0.0, 1e-7);
+    }
+
+    #[test]
+    fn test_function_inverter_with_float32() {
+        //
+        // Test with f32 type.
+        //
+        let f = |x: f32| -> f32 { 2.0 * x + 3.0 };
+        let f0 = 7.0;
+        let guess1 = 1.0;
+        let guess2 = 3.0;
+        let tolerance = 1e-5; // Lower precision for f32
+        let max_iterations = 100;
+        let n_order = 1;
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+
+        assert_approx_eq!(result, 2.0, 1e-4);
+    }
+
+    #[test]
+    fn test_function_inverter_high_order() {
+        //
+        // Test with a higher order of interpolation.
+        //
+        let f = |x: f64| -> f64 { x.powi(4) - 16.0 };
+        let f0 = 0.0;
+        let guess1 = 1.0;
+        let guess2 = 3.0;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = 4; // Higher order
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+
+        assert_approx_eq!(result, 2.0, 1e-9);
+    }
+
+    #[test]
+    fn test_max_iterations_limit() {
+        //
+        // Test that the function returns a reasonable approximation
+        // even when max iterations is small.
+        //
+        let f = |x: f64| -> f64 { x.sqrt() };
+        let f0 = 3.0; // f(9) = 3
+        let guess1 = 4.0;
+        let guess2 = 12.0;
+        let tolerance = 1e-10;
+        let max_iterations = 5; // Very few iterations
+        let n_order = 2;
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+        //
+        // Result might not be exact but should be close.
+        //
+        let function_value = f(result);
+        assert!((function_value - f0).abs() < 0.1);
+    }
+
+    #[test]
+    fn test_invalid_order() {
+        //
+        // Test with invalid order (negative).
+        //
+        let f = |x: f64| -> f64 { x };
+        let f0 = 1.0;
+        let guess1 = 0.0;
+        let guess2 = 2.0;
+        let tolerance = 1e-10;
+        let max_iterations = 100;
+        let n_order = -1; // Invalid
+
+        let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
+        //
+        // Should return NaN for invalid order.
+        //
+        assert!(result.is_nan());
+    }
 }
