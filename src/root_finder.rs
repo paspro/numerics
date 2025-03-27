@@ -672,7 +672,7 @@ mod tests {
         // Verify that the result is actually a root.
         //
         let function_value = f(result);
-        assert_approx_eq!(function_value, 0.0, 1e-7);
+        assert_approx_eq!(function_value, 0.0, 1e-9);
     }
 
     #[test]
@@ -690,7 +690,7 @@ mod tests {
 
         let result = function_inverter(&f, f0, guess1, guess2, tolerance, max_iterations, n_order);
 
-        assert_approx_eq!(result, 2.0, 1e-4);
+        assert_approx_eq!(result, 2.0, 1e-9);
     }
 
     #[test]
