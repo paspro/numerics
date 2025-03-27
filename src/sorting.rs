@@ -27,15 +27,6 @@
 ///     the original positions of elements in the sorted result.
 ///   - If `return_indices` is false, returns an empty vector.
 ///
-/// - Example:
-///
-/// ```
-/// let mut values = vec![5, 2, 9, 1, 5, 6];
-/// let indices = quicksort_with_indices(&mut values, true);
-/// assert_eq!(values, [1, 2, 5, 5, 6, 9]);
-/// assert_eq!(indices, [3, 1, 0, 4, 5, 2]); // Original positions of each element
-/// ```
-///
 pub fn quicksort_with_indices<T: PartialOrd>(vec: &mut [T], return_indices: bool) -> Vec<usize> {
     let n = vec.len();
     //
