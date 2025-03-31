@@ -18,8 +18,10 @@ pub mod interpolations;
 pub mod root_finder;
 pub mod search;
 pub mod sorting;
+pub mod determinants;
 
 pub use interpolations::*;
 pub use root_finder::*;
 pub use search::*;
 pub use sorting::*;
+pub use determinants::*;
