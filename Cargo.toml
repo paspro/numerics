@@ -1,6 +1,6 @@
 [package]
 name = "numerics"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2024"
 description = "Implementation of various numerical algorithms"
 keywords = ["numerical"]

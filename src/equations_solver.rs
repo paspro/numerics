@@ -49,7 +49,7 @@ pub fn solve_cubic_equation<T: Float + std::fmt::Debug>(
     let nine = three * three;
     let twenty_seven = nine * three;
     //
-    // Calculate the discriminant
+    // Calculate the discriminant.
     //
     let delta0 = b * b - three * c;
     let delta1 = two * b * b * b - nine * b * c + twenty_seven * d;
@@ -65,7 +65,7 @@ pub fn solve_cubic_equation<T: Float + std::fmt::Debug>(
             return vec![Complex::new(-b / three, zero)];
         } else {
             //
-            // We need to respect the sigh of delta1
+            // We need to respect the sigh of delta1.
             //
             sqrt_term = Complex::new(delta1, zero);
         }
