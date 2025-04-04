@@ -76,10 +76,6 @@ pub fn solve_cubic_equation<T: Float + std::fmt::Debug>(
         sqrt_term = Complex::new(delta1 * delta1 - four * delta0 * delta0 * delta0, zero).sqrt();
     }
     let ci = ((Complex::new(delta1, zero) + sqrt_term) / two).powf(one_third);
-    println!(
-        "ci: {:?}, delta1: {:?}, sqrt_term: {:?}",
-        ci, delta1, sqrt_term
-    );
     //
     // Cube roots of unity: ω and ω².
     //
