@@ -19,9 +19,11 @@ pub mod root_finder;
 pub mod search;
 pub mod sorting;
 pub mod determinants;
+pub mod equations_solver;
 
 pub use interpolations::*;
 pub use root_finder::*;
 pub use search::*;
 pub use sorting::*;
 pub use determinants::*;
+pub use equations_solver::*;
